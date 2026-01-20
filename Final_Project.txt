@@ -1,0 +1,227 @@
+import tkinter as tk
+import math
+
+
+root = tk.Tk()
+root.title("CalcQ-f0327")
+root.geometry("420x600")
+root.configure(bg="black")
+root.resizable(False, False)
+
+expr = tk.StringVar()
+result = tk.StringVar()
+cursor_pos = 0
+
+def update_display():
+    text = expr.get()
+    expr_label.config(text=text[:cursor_pos] + "|" + text[cursor_pos:])
+
+
+def insert(text):
+    global cursor_pos
+    s = expr.get()
+    expr.set(s[:cursor_pos] + text + s[cursor_pos:])
+    cursor_pos += len(text)
+    update_display()
+
+
+def move_left():
+    global cursor_pos
+    if cursor_pos > 0:
+        cursor_pos -= 1
+    update_display()
+
+
+def move_right():
+    global cursor_pos
+    if cursor_pos < len(expr.get()):
+        cursor_pos += 1
+    update_display()
+
+
+def backspace():
+    global cursor_pos
+    if cursor_pos > 0:
+        s = expr.get()
+        expr.set(s[:cursor_pos - 1] + s[cursor_pos:])
+        cursor_pos -= 1
+    update_display()
+
+
+def clear():
+    global cursor_pos
+    expr.set("")
+    result.set("")
+    cursor_pos = 0
+    update_display()
+
+
+
+def calculate():
+    try:
+        expression = expr.get()
+
+
+        if "^" in expression:
+            base, exp = expression.split("^")
+            answer = float(base) ** float(exp)
+
+
+        elif "+" in expression:
+            a, b = expression.split("+")
+            answer = float(a) + float(b)
+
+
+        elif "-" in expression:
+            a, b = expression.split("-")
+            answer = float(a) - float(b)
+
+        elif "*" in expression:
+            a, b = expression.split("*")
+            answer = float(a) * float(b)
+
+        elif "/" in expression:
+            a, b = expression.split("/")
+            answer = float(a) / float(b)
+
+        elif expression.startswith("sin("):
+            x = float(expression[4:-1])
+            answer = math.sin(x)
+
+
+        elif expression.startswith("cos("):
+            x = float(expression[4:-1])
+            answer = math.cos(x)
+
+        elif expression.startswith("tan("):
+            x = float(expression[4:-1])
+            answer = math.tan(x)
+
+        elif expression.startswith("log("):
+            x = float(expression[4:-1])
+            answer = math.log10(x)
+
+        elif expression.startswith("ln("):
+            x = float(expression[3:-1])
+            answer = math.log(x)
+
+        elif expression.startswith("sqrt("):
+            x = float(expression[5:-1])
+            answer = math.sqrt(x)
+
+        elif expression.startswith("fact("):
+            x = int(expression[5:-1])
+            answer = math.factorial(x)
+
+        elif expression == "pi":
+            answer = math.pi
+
+
+        elif expression == "e":
+            answer = math.e
+
+        else:
+            answer = "Invalid Input"
+
+        result.set(answer)
+
+    except:
+        result.set("Error")
+
+
+def fraction():
+    global cursor_pos
+    insert("()/()")
+    cursor_pos -= 3
+    update_display()
+
+
+display = tk.Frame(root, bg="#1c1c1c", bd=4, relief="sunken", height=120)
+display.pack(padx=10, pady=10, fill="x")
+display.pack_propagate(False)
+
+expr_label = tk.Label(
+    display,
+    font=("Consolas", 14),
+    fg="#00ff9c",
+    bg="#1c1c1c",
+    anchor="e",
+    height=2
+)
+expr_label.pack(fill="x")
+
+result_label = tk.Label(
+    display,
+    textvariable=result,
+    font=("Consolas", 26, "bold"),
+    fg="#00ff9c",
+    bg="#1c1c1c",
+    anchor="e",
+    height=2
+)
+result_label.pack(fill="x")
+
+update_display()
+
+
+btn_frame = tk.Frame(root, bg="black")
+btn_frame.pack()
+
+
+def btn(t, r, c, cmd):
+    tk.Button(
+        btn_frame,
+        text=t,
+        width=6,
+        height=2,
+        font=("Arial", 11),
+        bg="#2b2b2b",
+        fg="white",
+        command=cmd
+    ).grid(row=r, column=c, padx=4, pady=4)
+
+
+btn("◀", 0, 0, move_left)
+btn("▶", 0, 1, move_right)
+btn("C", 0, 2, clear)
+btn("⌫", 0, 3, backspace)
+
+
+btn("sin", 1, 0, lambda: insert("sin("))
+btn("cos", 1, 1, lambda: insert("cos("))
+btn("tan", 1, 2, lambda: insert("tan("))
+btn("!", 1, 3, lambda: insert("fact("))
+
+btn("log", 2, 0, lambda: insert("log("))
+btn("ln", 2, 1, lambda: insert("ln("))
+btn("√", 2, 2, lambda: insert("sqrt("))
+btn("π", 2, 3, lambda: insert("pi"))
+
+btn("a/b", 3, 0, fraction)
+btn("(", 3, 1, lambda: insert("("))
+btn(")", 3, 2, lambda: insert(")"))
+btn("^", 3, 3, lambda: insert("^"))
+
+
+btn("7", 4, 0, lambda: insert("7"))
+btn("8", 4, 1, lambda: insert("8"))
+btn("9", 4, 2, lambda: insert("9"))
+btn("÷", 4, 3, lambda: insert("/"))
+
+btn("4", 5, 0, lambda: insert("4"))
+btn("5", 5, 1, lambda: insert("5"))
+btn("6", 5, 2, lambda: insert("6"))
+btn("×", 5, 3, lambda: insert("*"))
+
+btn("1", 6, 0, lambda: insert("1"))
+btn("2", 6, 1, lambda: insert("2"))
+btn("3", 6, 2, lambda: insert("3"))
+btn("-", 6, 3, lambda: insert("-"))
+
+btn("0", 7, 0, lambda: insert("0"))
+btn(".", 7, 1, lambda: insert("."))
+btn("=", 7, 2, calculate)
+btn("+", 7, 3, lambda: insert("+"))
+
+
+root.mainloop()
